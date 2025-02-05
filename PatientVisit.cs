@@ -59,10 +59,29 @@ public class PatientVisit : INotifyPropertyChanged
         get => _isChecked;
         set
         {
-            _isChecked = value;
-            OnPropertyChanged(nameof(IsChecked));
+            if (_isChecked != value) // Avoid unnecessary updates
+            {
+                _isChecked = value;
+                OnPropertyChanged(nameof(IsChecked));
+
+                if (CheckboxElement != null)
+                {
+                    if (CheckboxElement.TryGetCurrentPattern(TogglePattern.Pattern, out object togglePatternObj))
+                    {
+                        var togglePattern = (TogglePattern)togglePatternObj;
+                        // Ensure the UI element is only toggled if needed
+                        if ((value && togglePattern.Current.ToggleState != ToggleState.On) ||
+                            (!value && togglePattern.Current.ToggleState != ToggleState.Off))
+                        {
+                            togglePattern.Toggle();
+                        }
+                    }
+                }
+            }
         }
     }
+
+
 
     public event PropertyChangedEventHandler PropertyChanged;
 

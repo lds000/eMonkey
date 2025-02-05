@@ -7,26 +7,20 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <ListView x:Name="PatientVisitList" Margin="10">
+        <ListView ItemsSource="{Binding PatientVisits}" SelectedItem="{Binding SelectedVisit}">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Select">
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding PatientName}" />
+                    <GridViewColumn Header="Time" DisplayMemberBinding="{Binding AppointmentTime}" />
+                    <GridViewColumn Header="Checkbox">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" 
-                                  DataContext="{Binding}"
-                                  Click="ToggleCheckbox"/>
+                                          
+                                          CommandParameter="{Binding}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Time" DisplayMemberBinding="{Binding AppointmentTime}" Width="80"/>
-                    <GridViewColumn Header="Patient Name" DisplayMemberBinding="{Binding PatientName}" Width="150"/>
-                    <GridViewColumn Header="Insurance" DisplayMemberBinding="{Binding Insurance}" Width="150"/>
-                    <GridViewColumn Header="Provider" DisplayMemberBinding="{Binding Provider}" Width="150"/>
-                    <GridViewColumn Header="Reason" DisplayMemberBinding="{Binding VisitReason}" Width="200"/>
-                    <GridViewColumn Header="Gender" DisplayMemberBinding="{Binding Gender}" Width="50"/>
-                    <GridViewColumn Header="Age" DisplayMemberBinding="{Binding Age}" Width="50"/>
-                    <GridViewColumn Header="Status" DisplayMemberBinding="{Binding VisitStatus}" Width="100"/>
                 </GridView>
             </ListView.View>
         </ListView>
