@@ -8,8 +8,43 @@ public class PatientVisitExtractor
 {
     public static List<PatientVisit> GetPatientVisits(IntPtr chromeWindowHandle)
     {
+        
+
+
         List<PatientVisit> patientVisits = new List<PatientVisit>();
         AutomationElement chromeWindow = AutomationElement.FromHandle(chromeWindowHandle);
+
+        //for debugging purposes create a string representation of all the child automation elements contained in the window
+        foreach (AutomationElement child in allChildren)
+        {
+            string childInfo = $"Name: {child.Current.Name}, " +
+                               $"ControlType: {child.Current.ControlType.ProgrammaticName}, " +
+                               $"AutomationId: {child.Current.AutomationId}";
+
+            if (child.TryGetCurrentPattern(InvokePattern.Pattern, out object invokePatternObj))
+            {
+                childInfo += ", Supports InvokePattern";
+            }
+
+            if (child.TryGetCurrentPattern(ValuePattern.Pattern, out object valuePatternObj))
+            {
+                var valuePattern = (ValuePattern)valuePatternObj;
+                childInfo += $", Value: {valuePattern.Current.Value}";
+            }
+
+            if (child.TryGetCurrentPattern(SelectionPattern.Pattern, out object selectionPatternObj))
+            {
+                childInfo += ", Supports SelectionPattern";
+            }
+
+            if (child.TryGetCurrentPattern(ScrollPattern.Pattern, out object scrollPatternObj))
+            {
+                childInfo += ", Supports ScrollPattern";
+            }
+
+            Console.WriteLine(childInfo);
+        }
+
 
         if (chromeWindow == null)
         {
