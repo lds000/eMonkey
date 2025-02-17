@@ -8,28 +8,10 @@ namespace eMonkey
 {
     public class PatientVisitViewModel : INotifyPropertyChanged
     {
-
         public ICommand CheckBoxCommand
         {
             get;
         }
-
-        public PatientVisitViewModel()
-        {
-            CheckBoxCommand = new RelayCommand(OnCheckBoxChecked);
-            PatientVisits = new ObservableCollection<PatientVisit>();
-        }
-
-        private void OnCheckBoxChecked(object parameter)
-        {
-            // Implement your custom behavior here
-            var patientVisit = parameter as PatientVisit;
-            if (patientVisit != null)
-            {
-                // Custom behavior logic
-            }
-        }
-
         public ObservableCollection<PatientVisit> PatientVisits
         {
             get; set;
@@ -46,27 +28,18 @@ namespace eMonkey
             }
         }
 
-        public ICommand ToggleCheckboxCommand
+        public PatientVisitViewModel()
         {
-            get;
+            CheckBoxCommand = new RelayCommand(OnCheckBoxChecked);
+            PatientVisits = new ObservableCollection<PatientVisit>();
         }
 
-
-        private bool CanToggleCheckbox(object parameter)
+        private void OnCheckBoxChecked(object parameter)
         {
-            return parameter is PatientVisit visit && visit.CheckboxElement != null;
-        }
-
-        private void ToggleCheckbox(object parameter)
-        {
-            if (parameter is PatientVisit visit && visit.CheckboxElement != null)
+            var patientVisit = parameter as PatientVisit;
+            if (patientVisit != null)
             {
-                if (visit.CheckboxElement.TryGetCurrentPattern(TogglePattern.Pattern, out object togglePatternObj))
-                {
-                    var togglePattern = (TogglePattern)togglePatternObj;
-                    togglePattern.Toggle();
-                    visit.IsChecked = !visit.IsChecked;  // Update ViewModel state
-                }
+                // Custom behavior logic
             }
         }
 
@@ -79,10 +52,16 @@ namespace eMonkey
             }
         }
 
+        public void UpdateCheckboxStatus(PatientVisit visit, bool isChecked)
+        {
+            if (visit != null)
+            {
+                visit.IsChecked = isChecked;
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-
     }
 }
