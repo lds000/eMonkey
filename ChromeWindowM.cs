@@ -1,16 +1,69 @@
-﻿using System;
+﻿using eMonkey;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Automation;
+using Condition = System.Windows.Automation.Condition;
 
-public class PatientVisitExtractor
+/// <summary>
+/// Represents a Chrome window and provides methods to interact with its elements.
+/// </summary>
+public class ChromeWindowM
 {
-    public static List<PatientVisit> GetPatientVisits(IntPtr chromeWindowHandle, Action<PatientVisit, bool> checkboxStatusChangedCallback)
+    private readonly AutomationElement _chromeWindow;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ChromeWindowM"/> class.
+    /// </summary>
+    /// <param name="windowHandle">The handle of the Chrome window.</param>
+    public ChromeWindowM(IntPtr windowHandle)
+    {
+        var handle = WindowHelper.GetWindowHandle("eCW (");
+        if (handle == IntPtr.Zero)
+        {
+            throw new ArgumentException("Invalid window handle.");
+        }
+        _chromeWindow = AutomationElement.FromHandle(windowHandle);
+    }
+
+    /// <summary>
+    /// Gets all child elements of the Chrome window.
+    /// </summary>
+    /// <returns>A collection of child automation elements.</returns>
+    public AutomationElementCollection GetAllChildElements()
+    {
+        return _chromeWindow.FindAll(TreeScope.Descendants, Condition.TrueCondition);
+    }
+
+    /// <summary>
+    /// Gets all data items in the Chrome window.
+    /// </summary>
+    /// <returns>A collection of data item automation elements.</returns>
+    public AutomationElementCollection GetDataItems()
+    {
+        return _chromeWindow.FindAll(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.DataItem));
+    }
+
+    /// <summary>
+    /// Gets all checkboxes in the Chrome window.
+    /// </summary>
+    /// <returns>A collection of checkbox automation elements.</returns>
+    public AutomationElementCollection GetCheckboxes()
+    {
+        return _chromeWindow.FindAll(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.CheckBox));
+    }
+
+    /// <summary>
+    /// Gets the patient visits from the specified window handle.
+    /// </summary>
+    /// <param name="checkboxStatusChangedCallback">The callback to invoke when a checkbox status changes.</param>
+    /// <returns>A list of patient visits.</returns>
+    public List<PatientVisit> GetPatientVisits(Action<PatientVisit, bool> checkboxStatusChangedCallback)
     {
         List<PatientVisit> patientVisits = new List<PatientVisit>();
-        AutomationElement chromeWindow = AutomationElement.FromHandle(chromeWindowHandle);
-        var allChildren = chromeWindow.FindAll(TreeScope.Descendants, System.Windows.Automation.Condition.TrueCondition);
+
+        var allChildren = GetAllChildElements();
 
         foreach (AutomationElement child in allChildren)
         {
@@ -49,17 +102,8 @@ public class PatientVisitExtractor
             Console.WriteLine(childInfo);
         }
 
-        if (chromeWindow == null)
-        {
-            Console.WriteLine("❌ Unable to find Chrome Legacy Window.");
-            return patientVisits;
-        }
-
-        var dataItems = chromeWindow.FindAll(TreeScope.Descendants,
-            new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.DataItem));
-
-        var checkboxes = chromeWindow.FindAll(TreeScope.Descendants,
-            new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.CheckBox));
+        var dataItems = GetDataItems();
+        var checkboxes = GetCheckboxes();
 
         Dictionary<int, Dictionary<int, string>> tableData = new Dictionary<int, Dictionary<int, string>>();
         Dictionary<int, AutomationElement> checkboxLookup = new Dictionary<int, AutomationElement>();
@@ -163,7 +207,7 @@ public class PatientVisitExtractor
 
             if (checkboxElement != null)
             {
-                Automation.AddAutomationPropertyChangedEventHandler(checkboxElement, TreeScope.Element, (sender, e) =>
+                AddPropertyChangedEventHandler(checkboxElement, TogglePattern.ToggleStateProperty, (sender, e) =>
                 {
                     if (e.Property == TogglePattern.ToggleStateProperty)
                     {
@@ -171,10 +215,45 @@ public class PatientVisitExtractor
                         bool newIsChecked = togglePattern.Current.ToggleState == ToggleState.On;
                         checkboxStatusChangedCallback(patientVisit, newIsChecked);
                     }
-                }, TogglePattern.ToggleStateProperty);
+                });
             }
         }
 
         return patientVisits;
+    }
+
+    /// <summary>
+    /// Event handler for window opened event.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event arguments.</param>
+    private static void OnWindowOpened(object sender, AutomationEventArgs e)
+    {
+        var element = sender as AutomationElement;
+        if (element != null)
+        {
+            Console.WriteLine($"New window opened: {element.Current.Name}");
+            // Handle the new window (popup) here
+        }
+    }
+
+    /// <summary>
+    /// Adds an event handler for the window opened event.
+    /// </summary>
+    /// <param name="eventHandler">The event handler to add.</param>
+    public void AddWindowOpenedEventHandler(AutomationEventHandler eventHandler)
+    {
+        Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, _chromeWindow, TreeScope.Subtree, eventHandler);
+    }
+
+    /// <summary>
+    /// Adds an event handler for the property changed event on a specific element.
+    /// </summary>
+    /// <param name="element">The automation element to monitor.</param>
+    /// <param name="property">The property to monitor.</param>
+    /// <param name="eventHandler">The event handler to add.</param>
+    public void AddPropertyChangedEventHandler(AutomationElement element, AutomationProperty property, AutomationPropertyChangedEventHandler eventHandler)
+    {
+        Automation.AddAutomationPropertyChangedEventHandler(element, TreeScope.Element, eventHandler, property);
     }
 }

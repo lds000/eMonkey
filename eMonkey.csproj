@@ -87,8 +87,9 @@
     </ApplicationDefinition>
     <Compile Include="CheckBoxInteracter.cs" />
     <Compile Include="CheckboxItem.cs" />
+    <Compile Include="ChromeWindowM.cs" />
+    <Compile Include="ChromeWindowVM.cs" />
     <Compile Include="PatientVisit.cs" />
-    <Compile Include="PatientVisitExtractor.cs" />
     <Compile Include="PatientVisitViewModel.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="TableDataRow.cs" />
