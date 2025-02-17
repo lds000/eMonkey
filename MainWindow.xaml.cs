@@ -16,9 +16,9 @@ namespace eMonkey
             DataContext = _viewModel;
 
             //get handle from a window with Title starting with "eCW"
-            var handle = WindowHelper.GetWindowHandle("eCW");
+            var handle = WindowHelper.GetWindowHandle("eCW (");
 
-            _viewModel.LoadPatientVisits(new IntPtr(handle)); // Example handle
+            _viewModel.LoadPatientVisits(handle); // Example handle
         }
     }
 

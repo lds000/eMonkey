@@ -13,7 +13,7 @@ public class PatientVisitExtractor
 
         List<PatientVisit> patientVisits = new List<PatientVisit>();
         AutomationElement chromeWindow = AutomationElement.FromHandle(chromeWindowHandle);
-
+        var allChildren = chromeWindow.FindAll(TreeScope.Descendants, System.Windows.Automation.Condition.TrueCondition);
         //for debugging purposes create a string representation of all the child automation elements contained in the window
         foreach (AutomationElement child in allChildren)
         {
@@ -26,6 +26,21 @@ public class PatientVisitExtractor
                 childInfo += ", Supports InvokePattern";
             }
 
+        //This next function is producing this error
+
+        /*
+        Name: , ControlType:
+            ControlType.Text, AutomationId:
+            rnUserName
+Name: Enter Password to Unlock, ControlType: ControlType.Text, AutomationId:
+        Name: , ControlType:
+            ControlType.Image, AutomationId:
+            Exception thrown: 'System.InvalidOperationException' in UIAutomationClient.dll
+            An exception of type 'System.InvalidOperationException' occurred in UIAutomationClient.dll but was not handled in user code
+Operation is not valid due to the current state of the object.
+   at MS.Internal.Automation.ElementUtil.Invoke(AutomationPeer peer, DispatcherOperationCallback work, Object arg)
+   at MS.Internal.Automation.ValueProviderWrapper.get_Value()
+   */
             if (child.TryGetCurrentPattern(ValuePattern.Pattern, out object valuePatternObj))
             {
                 var valuePattern = (ValuePattern)valuePatternObj;
