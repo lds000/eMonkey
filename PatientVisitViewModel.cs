@@ -8,6 +8,28 @@ namespace eMonkey
 {
     public class PatientVisitViewModel : INotifyPropertyChanged
     {
+
+        public ICommand CheckBoxCommand
+        {
+            get;
+        }
+
+        public PatientVisitViewModel()
+        {
+            CheckBoxCommand = new RelayCommand(OnCheckBoxChecked);
+            PatientVisits = new ObservableCollection<PatientVisit>();
+        }
+
+        private void OnCheckBoxChecked(object parameter)
+        {
+            // Implement your custom behavior here
+            var patientVisit = parameter as PatientVisit;
+            if (patientVisit != null)
+            {
+                // Custom behavior logic
+            }
+        }
+
         public ObservableCollection<PatientVisit> PatientVisits
         {
             get; set;
@@ -29,11 +51,6 @@ namespace eMonkey
             get;
         }
 
-        public PatientVisitViewModel()
-        {
-            PatientVisits = new ObservableCollection<PatientVisit>();
-           // ToggleCheckboxCommand = new RelayCommand(ToggleCheckbox, CanToggleCheckbox);
-        }
 
         private bool CanToggleCheckbox(object parameter)
         {
@@ -65,5 +82,7 @@ namespace eMonkey
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+
     }
 }
