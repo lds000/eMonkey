@@ -18,15 +18,15 @@ namespace eMonkey
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = _viewModel;
-
-
 
             // Get handle from a window with Title starting with "eCW"
             var handle = WindowHelper.GetWindowHandle("eCW (");
 
             _chromeWindow = new ChromeWindowM(handle);
             _viewModel = new PatientVisitViewModel(_chromeWindow);
+
+            // Set DataContext after initializing the ViewModel
+            DataContext = _viewModel;
 
             // Load patient visits using the obtained window handle
             _viewModel.LoadPatientVisits(handle); // Example handle
