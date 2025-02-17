@@ -25,6 +25,9 @@ public class ChromeWindowM
             throw new ArgumentException("Invalid window handle.");
         }
         _chromeWindow = AutomationElement.FromHandle(windowHandle);
+
+        // Add event handlers for various automation events
+        AddAutomationEventHandlers();
     }
 
     /// <summary>
@@ -59,9 +62,9 @@ public class ChromeWindowM
     /// </summary>
     /// <param name="checkboxStatusChangedCallback">The callback to invoke when a checkbox status changes.</param>
     /// <returns>A list of patient visits.</returns>
-    public List<PatientVisit> GetPatientVisits(Action<PatientVisit, bool> checkboxStatusChangedCallback)
+    public List<PatientVisitM> GetPatientVisits(Action<PatientVisitM, bool> checkboxStatusChangedCallback)
     {
-        List<PatientVisit> patientVisits = new List<PatientVisit>();
+        List<PatientVisitM> patientVisits = new List<PatientVisitM>();
 
         var allChildren = GetAllChildElements();
 
@@ -186,7 +189,7 @@ public class ChromeWindowM
             if (checkboxElement == null)
                 Console.WriteLine($"⚠️ Warning: Null checkbox for row {rowIndex} (Potential Missing UI Element)");
 
-            var patientVisit = new PatientVisit
+            var patientVisit = new PatientVisitM
             {
                 AppointmentTime = columns.TryGetValue(8, out string appointmentTime) ? appointmentTime : "",
                 Provider = columns.TryGetValue(11, out string provider) ? provider : "",
@@ -223,6 +226,17 @@ public class ChromeWindowM
     }
 
     /// <summary>
+    /// Adds event handlers for various automation events.
+    /// </summary>
+    private void AddAutomationEventHandlers()
+    {
+        Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, _chromeWindow, TreeScope.Subtree, OnWindowOpened);
+        Automation.AddAutomationEventHandler(WindowPattern.WindowClosedEvent, _chromeWindow, TreeScope.Subtree, OnWindowClosed);
+        Automation.AddStructureChangedEventHandler(_chromeWindow, TreeScope.Subtree, OnStructureChanged);
+        Automation.AddAutomationPropertyChangedEventHandler(_chromeWindow, TreeScope.Subtree, OnPropertyChanged, AutomationElementIdentifiers.NameProperty);
+    }
+
+    /// <summary>
     /// Event handler for window opened event.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
@@ -234,6 +248,48 @@ public class ChromeWindowM
         {
             Console.WriteLine($"New window opened: {element.Current.Name}");
             // Handle the new window (popup) here
+        }
+    }
+
+    /// <summary>
+    /// Event handler for window closed event.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event arguments.</param>
+    private static void OnWindowClosed(object sender, AutomationEventArgs e)
+    {
+        var element = sender as AutomationElement;
+        if (element != null)
+        {
+            Console.WriteLine($"Window closed: {element.Current.Name}");
+        }
+    }
+
+    /// <summary>
+    /// Event handler for structure changed event.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event arguments.</param>
+    private static void OnStructureChanged(object sender, StructureChangedEventArgs e)
+    {
+        var element = sender as AutomationElement;
+        if (element != null)
+        {
+            Console.WriteLine($"Structure changed: {element.Current.Name}");
+        }
+    }
+
+    /// <summary>
+    /// Event handler for property changed event.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event arguments.</param>
+    private static void OnPropertyChanged(object sender, AutomationPropertyChangedEventArgs e)
+    {
+        var element = sender as AutomationElement;
+        if (element != null)
+        {
+            Console.WriteLine($"Property changed: {element.Current.Name}, Property: {e.Property.ProgrammaticName}, Old Value: {e.OldValue}, New Value: {e.NewValue}");
         }
     }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Automation;
 
-public class CheckboxItem
+public class CheckboxItemM
 {
     public string Name
     {
@@ -13,7 +13,7 @@ public class CheckboxItem
     {
         get; set;
     }
-    public string State
+    public string ToggleState
     {
         get; set;
     }
@@ -31,7 +31,7 @@ public class CheckboxItem
         return $"☑️ Checkbox: {Name}\n" +
                $"   🆔 Automation ID: {AutomationId}\n" +
                $"   📍 Bounding Rectangle: (X: {BoundingRectangle.X}, Y: {BoundingRectangle.Y}, W: {BoundingRectangle.Width}, H: {BoundingRectangle.Height})\n" +
-               $"   ✅ State: {State}\n";
+               $"   ✅ State: {ToggleState}\n";
     }
 }
 

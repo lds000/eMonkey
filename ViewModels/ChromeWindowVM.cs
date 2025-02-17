@@ -8,21 +8,21 @@ namespace eMonkey
     public class ChromeWindowVM : INotifyPropertyChanged
     {
         private ChromeWindowM _chromeWindow;
-        private PatientVisit _selectedVisit;
+        private PatientVisitM _selectedVisit;
 
         public ChromeWindowVM(IntPtr windowHandle)
         {
             _chromeWindow = new ChromeWindowM(windowHandle);
-            PatientVisits = new ObservableCollection<PatientVisit>();
+            PatientVisits = new ObservableCollection<PatientVisitM>();
             LoadPatientVisits();
         }
 
-        public ObservableCollection<PatientVisit> PatientVisits
+        public ObservableCollection<PatientVisitM> PatientVisits
         {
             get; set;
         }
 
-        public PatientVisit SelectedVisit
+        public PatientVisitM SelectedVisit
         {
             get => _selectedVisit;
             set
@@ -36,7 +36,7 @@ namespace eMonkey
 
         private void OnCheckBoxChecked(object parameter)
         {
-            if (parameter is PatientVisit patientVisit)
+            if (parameter is PatientVisitM patientVisit)
             {
                 // Custom behavior logic
             }
@@ -51,7 +51,7 @@ namespace eMonkey
             }
         }
 
-        private void OnCheckboxStatusChanged(PatientVisit visit, bool isChecked)
+        private void OnCheckboxStatusChanged(PatientVisitM visit, bool isChecked)
         {
             if (visit != null)
             {

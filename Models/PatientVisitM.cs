@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Automation;
 
-public class PatientVisit : INotifyPropertyChanged
+public class PatientVisitM : INotifyPropertyChanged
 {
     private bool _isChecked;
 

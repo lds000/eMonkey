@@ -9,7 +9,7 @@ namespace eMonkey
 {
     public class CheckboxInteractor
     {
-        public static void ToggleCheckbox(CheckboxItem checkbox)
+        public static void ToggleCheckbox(CheckboxItemM checkbox)
         {
             if (checkbox.Element == null)
             {
@@ -17,9 +17,9 @@ namespace eMonkey
                 return;
             }
 
-            if (checkbox.Element.TryGetCurrentPattern(TogglePattern.Pattern, out object togglePatternObj))
+            if (checkbox.Element.TryGetCurrentPattern(TogglePattern.Pattern, out object togglePatternObject))
             {
-                var togglePattern = (TogglePattern)togglePatternObj;
+                var togglePattern = (TogglePattern)togglePatternObject;
                 togglePattern.Toggle(); // Clicks the checkbox
                 Console.WriteLine($"✅ Toggled Checkbox: {checkbox.Name}");
             }

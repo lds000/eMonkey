@@ -24,17 +24,17 @@ namespace eMonkey
         /// <summary>
         /// Collection of patient visits.
         /// </summary>
-        public ObservableCollection<PatientVisit> PatientVisits
+        public ObservableCollection<PatientVisitM> PatientVisits
         {
             get; set;
         }
 
-        private PatientVisit _selectedVisit;
+        private PatientVisitM _selectedVisit;
 
         /// <summary>
         /// Gets or sets the selected patient visit.
         /// </summary>
-        public PatientVisit SelectedVisit
+        public PatientVisitM SelectedVisit
         {
             get => _selectedVisit;
             set
@@ -50,7 +50,7 @@ namespace eMonkey
         public PatientVisitViewModel(ChromeWindowM chromeWindow)
         {
             CheckBoxCommand = new RelayCommand(OnCheckBoxChecked);
-            PatientVisits = new ObservableCollection<PatientVisit>();
+            PatientVisits = new ObservableCollection<PatientVisitM>();
             _chromeWindow = chromeWindow;
         }
 
@@ -60,7 +60,7 @@ namespace eMonkey
         /// <param name="parameter">The patient visit associated with the checkbox.</param>
         private void OnCheckBoxChecked(object parameter)
         {
-            var patientVisit = parameter as PatientVisit;
+            var patientVisit = parameter as PatientVisitM;
             if (patientVisit != null)
             {
                 // Custom behavior logic
@@ -85,7 +85,7 @@ namespace eMonkey
         /// </summary>
         /// <param name="visit">The patient visit associated with the checkbox.</param>
         /// <param name="isChecked">The new checkbox status.</param>
-        private void OnCheckboxStatusChanged(PatientVisit visit, bool isChecked)
+        private void OnCheckboxStatusChanged(PatientVisitM visit, bool isChecked)
         {
             if (visit != null)
             {
