@@ -272,12 +272,21 @@ public class ChromeWindowM
     /// <param name="e">The event arguments.</param>
     private static void OnStructureChanged(object sender, StructureChangedEventArgs e)
     {
-        var element = sender as AutomationElement;
-        if (element != null)
+        try
         {
-            Console.WriteLine($"Structure changed: {element.Current.Name}");
+            var element = sender as AutomationElement;
+            if (element != null)
+            {
+                Console.WriteLine($"Structure changed: {element.Current.Name}");
+            }
+        }
+        catch (ElementNotAvailableException ex)
+        {
+            Console.WriteLine($"⚠️ Warning: Element not available. Exception: {ex.Message}");
         }
     }
+
+
 
     /// <summary>
     /// Event handler for property changed event.
