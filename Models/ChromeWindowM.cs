@@ -175,7 +175,7 @@ public class ChromeWindowM
             {
                 checkboxElement = checkboxes
                     .Cast<AutomationElement>()
-                    .OrderBy(cb => Math.Abs(cb.Current.BoundingRectangle.Y - rowIndex * 30))
+                    .OrderBy(cb => Math.abs(cb.Current.BoundingRectangle.Y - rowIndex * 30))
                     .FirstOrDefault();
             }
 
@@ -230,9 +230,9 @@ public class ChromeWindowM
     /// </summary>
     private void AddAutomationEventHandlers()
     {
-        Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, _chromeWindow, TreeScope.Subtree, OnWindowOpened);
-        Automation.AddAutomationEventHandler(WindowPattern.WindowClosedEvent, _chromeWindow, TreeScope.Subtree, OnWindowClosed);
-        Automation.AddStructureChangedEventHandler(_chromeWindow, TreeScope.Subtree, OnStructureChanged);
+        Automation.AddAutomationEventHandler(WindowPattern.WindowOpenedEvent, AutomationElement.RootElement, TreeScope.Subtree, OnWindowOpened);
+        Automation.AddAutomationEventHandler(WindowPattern.WindowClosedEvent, AutomationElement.RootElement, TreeScope.Subtree, OnWindowClosed);
+        Automation.AddStructureChangedEventHandler(AutomationElement.RootElement, TreeScope.Subtree, OnStructureChanged);
         Automation.AddAutomationPropertyChangedEventHandler(_chromeWindow, TreeScope.Subtree, OnPropertyChanged, AutomationElementIdentifiers.NameProperty);
     }
 
@@ -285,8 +285,6 @@ public class ChromeWindowM
             Console.WriteLine($"⚠️ Warning: Element not available. Exception: {ex.Message}");
         }
     }
-
-
 
     /// <summary>
     /// Event handler for property changed event.
