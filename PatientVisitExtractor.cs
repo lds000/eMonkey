@@ -26,25 +26,32 @@ public class PatientVisitExtractor
                 childInfo += ", Supports InvokePattern";
             }
 
-        //This next function is producing this error
+            //This next function is producing this error
 
-        /*
-        Name: , ControlType:
-            ControlType.Text, AutomationId:
-            rnUserName
-Name: Enter Password to Unlock, ControlType: ControlType.Text, AutomationId:
-        Name: , ControlType:
-            ControlType.Image, AutomationId:
-            Exception thrown: 'System.InvalidOperationException' in UIAutomationClient.dll
-            An exception of type 'System.InvalidOperationException' occurred in UIAutomationClient.dll but was not handled in user code
-Operation is not valid due to the current state of the object.
-   at MS.Internal.Automation.ElementUtil.Invoke(AutomationPeer peer, DispatcherOperationCallback work, Object arg)
-   at MS.Internal.Automation.ValueProviderWrapper.get_Value()
-   */
-            if (child.TryGetCurrentPattern(ValuePattern.Pattern, out object valuePatternObj))
+            /*
+            Name: , ControlType:
+                ControlType.Text, AutomationId:
+                rnUserName
+            Name: Enter Password to Unlock, ControlType: ControlType.Text, AutomationId:
+            Name: , ControlType:
+                ControlType.Image, AutomationId:
+                Exception thrown: 'System.InvalidOperationException' in UIAutomationClient.dll
+                An exception of type 'System.InvalidOperationException' occurred in UIAutomationClient.dll but was not handled in user code
+            Operation is not valid due to the current state of the object.
+            at MS.Internal.Automation.ElementUtil.Invoke(AutomationPeer peer, DispatcherOperationCallback work, Object arg)
+            at MS.Internal.Automation.ValueProviderWrapper.get_Value()
+            */
+            try
             {
-                var valuePattern = (ValuePattern)valuePatternObj;
-                childInfo += $", Value: {valuePattern.Current.Value}";
+                if (child.TryGetCurrentPattern(ValuePattern.Pattern, out object valuePatternObj))
+                {
+                    var valuePattern = (ValuePattern)valuePatternObj;
+                    childInfo += $", Value: {valuePattern.Current.Value}";
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Exception caught: {ex.Message}");
             }
 
             if (child.TryGetCurrentPattern(SelectionPattern.Pattern, out object selectionPatternObj))
