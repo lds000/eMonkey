@@ -46,13 +46,13 @@ namespace eMonkey
         public void LoadPatientVisits(IntPtr chromeHandle)
         {
             PatientVisits.Clear();
-            foreach (var visit in PatientVisitExtractor.GetPatientVisits(chromeHandle))
+            foreach (var visit in PatientVisitExtractor.GetPatientVisits(chromeHandle, OnCheckboxStatusChanged))
             {
                 PatientVisits.Add(visit);
             }
         }
 
-        public void UpdateCheckboxStatus(PatientVisit visit, bool isChecked)
+        private void OnCheckboxStatusChanged(PatientVisit visit, bool isChecked)
         {
             if (visit != null)
             {

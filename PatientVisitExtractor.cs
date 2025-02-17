@@ -6,15 +6,12 @@ using System.Windows.Automation;
 
 public class PatientVisitExtractor
 {
-    public static List<PatientVisit> GetPatientVisits(IntPtr chromeWindowHandle)
+    public static List<PatientVisit> GetPatientVisits(IntPtr chromeWindowHandle, Action<PatientVisit, bool> checkboxStatusChangedCallback)
     {
-        
-
-
         List<PatientVisit> patientVisits = new List<PatientVisit>();
         AutomationElement chromeWindow = AutomationElement.FromHandle(chromeWindowHandle);
         var allChildren = chromeWindow.FindAll(TreeScope.Descendants, System.Windows.Automation.Condition.TrueCondition);
-        //for debugging purposes create a string representation of all the child automation elements contained in the window
+
         foreach (AutomationElement child in allChildren)
         {
             string childInfo = $"Name: {child.Current.Name}, " +
@@ -26,21 +23,6 @@ public class PatientVisitExtractor
                 childInfo += ", Supports InvokePattern";
             }
 
-            //This next function is producing this error
-
-            /*
-            Name: , ControlType:
-                ControlType.Text, AutomationId:
-                rnUserName
-            Name: Enter Password to Unlock, ControlType: ControlType.Text, AutomationId:
-            Name: , ControlType:
-                ControlType.Image, AutomationId:
-                Exception thrown: 'System.InvalidOperationException' in UIAutomationClient.dll
-                An exception of type 'System.InvalidOperationException' occurred in UIAutomationClient.dll but was not handled in user code
-            Operation is not valid due to the current state of the object.
-            at MS.Internal.Automation.ElementUtil.Invoke(AutomationPeer peer, DispatcherOperationCallback work, Object arg)
-            at MS.Internal.Automation.ValueProviderWrapper.get_Value()
-            */
             try
             {
                 if (child.TryGetCurrentPattern(ValuePattern.Pattern, out object valuePatternObj))
@@ -67,25 +49,21 @@ public class PatientVisitExtractor
             Console.WriteLine(childInfo);
         }
 
-
         if (chromeWindow == null)
         {
             Console.WriteLine("❌ Unable to find Chrome Legacy Window.");
             return patientVisits;
         }
 
-        // Get all DataItem elements (table cells)
         var dataItems = chromeWindow.FindAll(TreeScope.Descendants,
             new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.DataItem));
 
-        // Get all Checkbox elements
         var checkboxes = chromeWindow.FindAll(TreeScope.Descendants,
             new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.CheckBox));
 
         Dictionary<int, Dictionary<int, string>> tableData = new Dictionary<int, Dictionary<int, string>>();
         Dictionary<int, AutomationElement> checkboxLookup = new Dictionary<int, AutomationElement>();
 
-        // Extract DataItems
         foreach (AutomationElement element in dataItems)
         {
             string text = element.Current.Name?.Trim() ?? "";
@@ -107,7 +85,6 @@ public class PatientVisitExtractor
             }
         }
 
-        // Improved Checkbox Matching: Find parent row for each checkbox
         foreach (AutomationElement checkbox in checkboxes)
         {
             AutomationElement parentRow = TreeWalker.RawViewWalker.GetParent(checkbox);
@@ -124,7 +101,6 @@ public class PatientVisitExtractor
             }
         }
 
-        // Debugging: List all found checkboxes
         Console.WriteLine($"✅ Found {checkboxes.Count} checkboxes in the UI.");
 
         foreach (AutomationElement checkbox in checkboxes)
@@ -143,18 +119,16 @@ public class PatientVisitExtractor
             Console.WriteLine($"Checkbox: {name} | ID: {automationId} | State: {state} | Bounds: {boundingRect}");
         }
 
-        // Convert extracted data into PatientVisit objects
         foreach (var row in tableData.OrderBy(r => r.Key).Skip(1))
         {
             var columns = row.Value;
             int rowIndex = row.Key;
 
-            // Improved: Assign checkbox element, fallback to nearest checkbox if null
             if (!checkboxLookup.TryGetValue(rowIndex, out var checkboxElement))
             {
                 checkboxElement = checkboxes
                     .Cast<AutomationElement>()
-                    .OrderBy(cb => Math.Abs(cb.Current.BoundingRectangle.Y - rowIndex * 30)) // Approximate row matching
+                    .OrderBy(cb => Math.Abs(cb.Current.BoundingRectangle.Y - rowIndex * 30))
                     .FirstOrDefault();
             }
 
@@ -168,8 +142,7 @@ public class PatientVisitExtractor
             if (checkboxElement == null)
                 Console.WriteLine($"⚠️ Warning: Null checkbox for row {rowIndex} (Potential Missing UI Element)");
 
-            // Create the PatientVisit object
-            patientVisits.Add(new PatientVisit
+            var patientVisit = new PatientVisit
             {
                 AppointmentTime = columns.TryGetValue(8, out string appointmentTime) ? appointmentTime : "",
                 Provider = columns.TryGetValue(11, out string provider) ? provider : "",
@@ -184,7 +157,22 @@ public class PatientVisitExtractor
                 CycleTime = columns.TryGetValue(21, out string cycleTime) ? cycleTime : "",
                 IsChecked = isChecked,
                 CheckboxElement = checkboxElement
-            });
+            };
+
+            patientVisits.Add(patientVisit);
+
+            if (checkboxElement != null)
+            {
+                Automation.AddAutomationPropertyChangedEventHandler(checkboxElement, TreeScope.Element, (sender, e) =>
+                {
+                    if (e.Property == TogglePattern.ToggleStateProperty)
+                    {
+                        var togglePattern = (TogglePattern)checkboxElement.GetCurrentPattern(TogglePattern.Pattern);
+                        bool newIsChecked = togglePattern.Current.ToggleState == ToggleState.On;
+                        checkboxStatusChangedCallback(patientVisit, newIsChecked);
+                    }
+                }, TogglePattern.ToggleStateProperty);
+            }
         }
 
         return patientVisits;
